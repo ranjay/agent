@@ -1,71 +1,87 @@
 var Task = require('../models/task');
+var Agent = require('../models/agent');
 
-// function agentName(skill)
-//      var occupied_list=[]
-//
-//       AgentList.all.each do |summary|
-//         if summary.skills==skill
-//          if summary.status=="F"
-//             return summary.name
-//          elsif summary.status=="O"
-//             if summary.priority=="Low"
-//              return summary.name
-//             else
-//              occupied_list.push({name:summary.name,last_task_time:summary.last_task_time})
-//             }
-//           }
-//         }
-//       }
-//       if (occupied_list.size>0)
-//         var sorted=occupied_list.sort_by!{|item| item[:last_task_time]}
-//         var a=sorted.first
-//         return a["name"]
-//       }
-//   }
+function getAgent(skill, cb) {
+    let occupied_list = [];
+    Agent.find({}, function(err, res) {
+        let nomatch = true;
+        for (var i in res) {
+            var item = res[i];
+            if (item.skill == skill) {
+                nomatch = false;
+                if (item.status == "FREE") {
+                    cb(item.name);
+                } else if (item.status == "Occupied") {
+                    if (item.priority == "Low") {
+                        cb(item.name);
+                    } else {
+                        cb("NF");
+                    }
+                }
+            }
+        }
+        if (nomatch) {
+            cb("NF");
+        }
+
+    });
+}
+
 
 //Simple version, without validation or sanitation
-exports.agents = function (req, res) {
-  Task.find({}, function(err, tasks) {
-    console.log(tasks)
-         res.s}(tasks);
-      });
-};
+exports.list = function(req, res) {
+    Task.find({}, function(err, tasks) {
 
-exports.task_create = function (req, res,next) {
-    var task = new Task(
-        {
-            name: req.body.name,
-            skill: req.body.skill,
-            priority: req.body.priority
-        }
-    );
-    console.log(req.body)
-
-    task.save(function (err) {
-        if (err) {
-            return next(err);
-        }
-        res.s}('Task Created successfully')
-    })
-};
-
-exports.task_details =  function (req, res,next) {
-    Task.findById(req.params.id, function (err, task) {
-        if (err) return next(err);
-        res.s}(task);
-    })
-};
-
-exports.task_update = function (req, res) {
-    Task.findByIdAndUpdate(req.params.id, {$set: req.body}, function (err, task) {
-        if (err) return next(err);
-        res.s}('Task udpated.');
+        res.send(tasks);
     });
 };
 
-exports.task_delete = function (req, res,next) {
-    Task.findByIdAndRemove(req.params.id, function (err) {
+exports.create = function(req, res, next) {
+    getAgent(req.body.skill, function(agent) {
+        console.log(agent);
+        if (agent == "NF") {
+            res.send("Agent with this skill is not found")
+        } else {
+            let task = new Task({
+                name: req.body.name,
+                skill: req.body.skill,
+                priority: req.body.priority,
+                agent: agent
+            });
+            task.save(function(err) {
+                if (err) {
+                    return next(err);
+                }
+                Agent.findOneAndUpdate({ name: agent }, { $set: { status: "Occupied" } }, { new: true }, (err, doc) => {
+                    if (err) {
+                        console.log("Something wrong when updating data!");
+                    }
+                });
+
+                res.send(task)
+            })
+        }
+    });
+
+};
+
+exports.details = function(req, res, next) {
+    Task.findById(req.params.id, function(err, task) {
         if (err) return next(err);
-        res.s}('Deleted successfully!');
+        res.send(task);
+    })
+};
+
+exports.update = function(req, res) {
+    Task.findByIdAndUpdate(req.params.id, { $set: req.body }, function(err, task) {
+        if (err) return next(err);
+        res.send('Task udpated.');
+    });
+};
+
+exports.delete = function(req, res, next) {
+    Task.findByIdAndRemove(req.params.id, function(err) {
+        if (err) return next(err);
+        res.send('Deleted successfully!');
     })
 };

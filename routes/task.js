@@ -3,19 +3,16 @@ var router = express.Router();
 
 // Require the controllers WHICH WE DID NOT CREATE YET!!
 var task_controller = require('../controllers/task');
+var agent_controller = require('../controllers/agent');
 
 
 // a simple test url to check that all of our files are communicating correctly.
-router.get('/agents', task_controller.agents);
+router.get('/task/list', task_controller.list);
+router.post('/task/create', task_controller.create);
+router.put('/task:id/update', task_controller.update);
 
-
-router.post('/create', task_controller.task_create);
-
-router.get('/:id', task_controller.task_details);
-
-router.put('/:id/update', task_controller.task_update);
-
-router.delete('/:id/delete', task_controller.task_delete);
+router.get('/agent/list', agent_controller.list);
+router.post('/agent/create', agent_controller.create);
 
 
 module.exports = router;

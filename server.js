@@ -1,7 +1,6 @@
-// app.js
-
 var express = require('express');
 var bodyParser = require('body-parser');
+var cors = require('cors')
 
 var task = require('./routes/task'); // Imports routes for the tasks
 var app = express();
@@ -19,10 +18,14 @@ db.on('error', console.error.bind(console, 'MongoDB connection error:'));
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: false}));
-app.use('/task', task);
+app.use(cors());
+app.use('/', task);
+
 
 var port = 8080;
 
 app.listen(port, () => {
     console.log('Server is up and running on port numner ' + port);
 });
+
+module.exports = app;
