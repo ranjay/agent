@@ -1,0 +1,19 @@
+Local Setup:
+
+Install mongodb
+
+1. clone project
+2. npm i && node seed.js
+3. npm start 
+4. npm test
+
+
+urls:
+
+http://localhost:8080/task/list
+http://localhost:8080/task/create
+http://localhost:8080/task/update
+
+http://localhost:8080/agent/list
+http://localhost:8080/agent/create
+http://localhost:8080/agent/update

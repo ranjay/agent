@@ -73,7 +73,7 @@ exports.details = function(req, res, next) {
 };
 
 exports.update = function(req, res) {
-    Task.findByIdAndUpdate(req.params.id, { $set: req.body }, function(err, task) {
+    Task.findByIdAndUpdate(req.params.id, { $set: { status: "Completed" }, function(err, task) {
         if (err) return next(err);
         res.send('Task udpated.');
     });
